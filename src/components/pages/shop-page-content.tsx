@@ -159,7 +159,7 @@ export function ShopPageContent({ products, bundles }: ShopPageContentProps) {
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 2k:grid-cols-5 4k:grid-cols-6 gap-x-6 gap-y-12">
                     {filteredItems.map((item) => (
                         <ProductCard
                             key={item.id}
