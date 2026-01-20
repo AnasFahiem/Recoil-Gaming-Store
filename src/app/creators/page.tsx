@@ -10,7 +10,7 @@ export default function CreatorsPage() {
     const { t } = useLanguage()
 
     return (
-        <div className="min-h-screen bg-brand-black pt-24 pb-12">
+        <div className="min-h-screen pt-24 pb-12">
             <Container>
                 <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6">
                     <Typography variant="h1" className="text-brand-white">

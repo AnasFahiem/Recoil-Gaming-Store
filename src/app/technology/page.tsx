@@ -11,7 +11,7 @@ export default function TechnologyPage() {
     const { t } = useLanguage()
 
     return (
-        <div className="min-h-screen bg-brand-black pt-24 pb-24">
+        <div className="min-h-screen pt-24 pb-24">
             <Container>
                 <div className="max-w-4xl mx-auto text-center mb-16">
                     <Typography variant="h1" className="text-brand-white mb-6">

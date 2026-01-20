@@ -83,7 +83,7 @@ export default function SignupPage() {
     }
 
     return (
-        <div className="min-h-screen bg-brand-black flex flex-col relative overflow-hidden">
+        <div className="min-h-screen flex flex-col relative overflow-hidden">
             {/* Background Ambience */}
             <div className="absolute bottom-0 right-0 w-[800px] h-[800px] bg-brand-silver/5 blur-[120px] rounded-full pointer-events-none" />
 

@@ -33,7 +33,8 @@ export function HeroSection() {
             ref={ref}
         >
             {/* Dynamic Background */}
-            <div className="absolute inset-0 bg-brand-black z-0">
+            {/* Dynamic Background */}
+            <div className="absolute inset-0 z-0">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-brand-red/5 rounded-full blur-3xl opacity-50 animate-pulse" />
                 <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-brand-silver/5 rounded-full blur-3xl opacity-30" />
             </div>

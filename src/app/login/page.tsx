@@ -95,7 +95,7 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen bg-brand-black flex flex-col relative overflow-hidden">
+        <div className="min-h-screen flex flex-col relative overflow-hidden">
             {/* Background Ambience */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-brand-red/5 blur-[120px] rounded-full pointer-events-none" />
 

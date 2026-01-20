@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import { ClientLayout } from '@/components/layout/client-layout'
 import { LoadingProvider } from '@/contexts/loading-context'
 import { LoadingOverlay } from '@/components/ui/loading-overlay'
+import { BackgroundEffects } from '@/components/layout/background-effects'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' })
@@ -36,8 +37,11 @@ export default function RootLayout({
         <html lang="en">
             <body className={cn(inter.variable, outfit.variable, cairo.variable, "font-body bg-brand-black text-brand-white antialiased")}>
                 <LoadingProvider>
-                    <LoadingOverlay />
-                    <ClientLayout deviceType={deviceType}>{children}</ClientLayout>
+                    <BackgroundEffects />
+                    <div className="relative z-10">
+                        <LoadingOverlay />
+                        <ClientLayout deviceType={deviceType}>{children}</ClientLayout>
+                    </div>
                 </LoadingProvider>
             </body>
         </html>

@@ -9,7 +9,7 @@ interface MobileViewProps {
 
 export function MobileView({ products }: MobileViewProps) {
     return (
-        <main className="flex min-h-screen flex-col bg-brand-black selection:bg-brand-red selection:text-white pb-20">
+        <main className="flex min-h-screen flex-col selection:bg-brand-red selection:text-white pb-20">
             {/* 
                 MOBILE SPECIFIC HEADER 
                 This helps us verify the switch is working

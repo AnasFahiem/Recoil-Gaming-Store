@@ -8,7 +8,7 @@ interface DesktopViewProps {
 
 export function DesktopView({ products }: DesktopViewProps) {
     return (
-        <main className="flex min-h-screen flex-col bg-brand-black selection:bg-brand-red selection:text-white">
+        <main className="flex min-h-screen flex-col selection:bg-brand-red selection:text-white">
             <HeroSection />
             <HomePageContent products={products} />
         </main>

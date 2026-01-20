@@ -42,7 +42,7 @@ export function ProductPageContent({ product }: ProductPageContentProps) {
     const currentImage = images[selectedImageIndex] || images[0] || null
 
     return (
-        <div className={cn("min-h-screen bg-brand-black pt-24 pb-24", language === 'ar' && "font-cairo font-bold")}>
+        <div className={cn("min-h-screen pt-24 pb-24", language === 'ar' && "font-cairo font-bold")}>
             <Container>
                 <Link href="/shop" className="text-brand-silver hover:text-brand-white mb-8 inline-flex items-center gap-2 transition-colors">
                     <ArrowLeft className="w-4 h-4" /> {t.product.backToShop}
