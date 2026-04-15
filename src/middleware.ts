@@ -31,8 +31,14 @@ export async function middleware(request: NextRequest) {
                     },
                     set(name: string, value: string, options: CookieOptions) {
                         request.cookies.set({ name, value, ...options } as any)
+                        // Make sure we carry over our custom injected headers!
                         response = NextResponse.next({
-                            request: { headers: request.headers },
+                            request: {
+                                headers: new Headers({
+                                    ...Object.fromEntries(request.headers),
+                                    'x-device-type': isMobile ? 'mobile' : 'desktop'
+                                }),
+                            },
                         })
                         response.cookies.set({ name, value, ...options } as any)
                         response.headers.set('x-device-type', isMobile ? 'mobile' : 'desktop')
@@ -40,7 +46,12 @@ export async function middleware(request: NextRequest) {
                     remove(name: string, options: CookieOptions) {
                         request.cookies.set({ name, value: '', ...options } as any)
                         response = NextResponse.next({
-                            request: { headers: request.headers },
+                            request: {
+                                headers: new Headers({
+                                    ...Object.fromEntries(request.headers),
+                                    'x-device-type': isMobile ? 'mobile' : 'desktop'
+                                }),
+                            },
                         })
                         response.cookies.set({ name, value: '', ...options } as any)
                         response.headers.set('x-device-type', isMobile ? 'mobile' : 'desktop')
