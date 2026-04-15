@@ -82,8 +82,9 @@ export function HeroSection() {
                                 alt="RECOIL Official Logo"
                                 fill
                                 priority
+                                unoptimized
                                 className="object-contain drop-shadow-[0_0_25px_rgba(215,38,49,0.3)]"
-                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 60vw"
                             />
                         </div>
                     </motion.div>

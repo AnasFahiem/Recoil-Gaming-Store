@@ -34,42 +34,60 @@ export function Navbar() {
         { name: t.nav.technology, href: "/technology" },
     ]
 
-    React.useEffect(() => {
-        const fetchUserData = async () => {
-            const role = localStorage.getItem("userRole")
+    const fetchUserData = React.useCallback(async () => {
+        if (!supabase) return
+
+        try {
+            // Always check the live Supabase session — do NOT rely solely on localStorage
+            const { data: { user }, error } = await supabase.auth.getUser()
+
+            if (error || !user) {
+                // No active session — clear any stale state
+                setUserRole(null)
+                setUsername(null)
+                localStorage.removeItem("userRole")
+                localStorage.removeItem("userEmail")
+                return
+            }
+
+            // User is authenticated — fetch profile from DB
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('username, role')
+                .eq('id', user.id)
+                .single()
+
+            const role = profile?.role || localStorage.getItem("userRole") || "USER"
             setUserRole(role)
 
-            if (role && supabase) {
-                const { data: { user } } = await supabase.auth.getUser()
-                if (user) {
-                    const { data } = await supabase
-                        .from('profiles')
-                        .select('username')
-                        .eq('id', user.id)
-                        .single()
+            // Sync localStorage with DB truth
+            localStorage.setItem("userRole", role)
+            localStorage.setItem("userEmail", user.email || "")
 
-                    if (data?.username) {
-                        setUsername(data.username)
-                    }
-                } else {
-                    // Stale data check
-                    setUserRole(null)
-                    setUsername(null)
-                    localStorage.removeItem("userRole")
-                    localStorage.removeItem("userEmail")
-                }
+            if (profile?.username) {
+                setUsername(profile.username)
+            } else {
+                // Fallback: use email prefix as display name
+                setUsername(user.email?.split('@')[0] || null)
             }
+        } catch (err) {
+            console.error("Navbar auth check failed:", err)
+            setUserRole(null)
+            setUsername(null)
         }
+    }, [])
+
+    React.useEffect(() => {
         fetchUserData()
 
-        // Auth Listener
+        // Auth State Listener — updates navbar on sign in / sign out / token refresh
         const { data: { subscription } } = supabase!.auth.onAuthStateChange((event, session) => {
             if (event === 'SIGNED_OUT') {
                 setUserRole(null)
                 setUsername(null)
                 localStorage.removeItem("userRole")
                 localStorage.removeItem("userEmail")
-            } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
                 fetchUserData()
             }
         })
@@ -77,10 +95,15 @@ export function Navbar() {
         return () => {
             subscription.unsubscribe()
         }
-    }, [pathname])
+    }, [fetchUserData])
+
+    // Re-check auth on route change (handles cases where state drifts after navigation)
+    React.useEffect(() => {
+        fetchUserData()
+    }, [pathname, fetchUserData])
 
     const handleUserIconClick = () => {
-        const role = localStorage.getItem("userRole")
+        const role = userRole
         if (role === 'ADMIN') {
             router.push("/admin")
         } else if (role === 'USER') {

@@ -1,21 +1,59 @@
-
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
     const userAgent = request.headers.get('user-agent') || ''
-
-    // Simple check for mobile devices
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
 
-    const requestHeaders = new Headers(request.headers)
-    requestHeaders.set('x-device-type', isMobile ? 'mobile' : 'desktop')
-
-    return NextResponse.next({
+    let response = NextResponse.next({
         request: {
-            headers: requestHeaders,
+            headers: new Headers({
+                ...Object.fromEntries(request.headers),
+                'x-device-type': isMobile ? 'mobile' : 'desktop',
+            }),
         },
     })
+
+    // Refresh Supabase session on every request so cookies stay fresh
+    // This fixes blank dashboard and stale auth state after page refresh
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+    if (supabaseUrl && supabaseAnonKey) {
+        const supabase = createServerClient(
+            supabaseUrl,
+            supabaseAnonKey,
+            {
+                cookies: {
+                    get(name: string) {
+                        return request.cookies.get(name)?.value
+                    },
+                    set(name: string, value: string, options: CookieOptions) {
+                        request.cookies.set({ name, value, ...options } as any)
+                        response = NextResponse.next({
+                            request: { headers: request.headers },
+                        })
+                        response.cookies.set({ name, value, ...options } as any)
+                        response.headers.set('x-device-type', isMobile ? 'mobile' : 'desktop')
+                    },
+                    remove(name: string, options: CookieOptions) {
+                        request.cookies.set({ name, value: '', ...options } as any)
+                        response = NextResponse.next({
+                            request: { headers: request.headers },
+                        })
+                        response.cookies.set({ name, value: '', ...options } as any)
+                        response.headers.set('x-device-type', isMobile ? 'mobile' : 'desktop')
+                    },
+                },
+            }
+        )
+
+        // This call refreshes the session and updates cookies automatically
+        await supabase.auth.getUser()
+    }
+
+    return response
 }
 
 export const config = {

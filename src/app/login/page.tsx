@@ -35,6 +35,10 @@ export default function LoginPage() {
             return
         }
 
+        // Clear any stale local state first
+        localStorage.removeItem("userRole")
+        localStorage.removeItem("userEmail")
+
         try {
             const { data, error } = await supabase.auth.signInWithPassword({
                 email,
@@ -45,47 +49,39 @@ export default function LoginPage() {
                 console.error("Login Error:", error)
                 setError(error.message)
                 setIsLoading(false)
+                return
+            }
+
+            if (!data.user) {
+                console.error("No user returned")
+                setError("Sign in failed. Please try again.")
+                setIsLoading(false)
+                return
+            }
+
+            setStatus("Fetching Profile...")
+
+            // Fetch Role from DB (single source of truth)
+            const { data: profile, error: profileError } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', data.user.id)
+                .single()
+
+            if (profileError) {
+                console.error("Profile Fetch Error:", profileError)
+            }
+
+            const role = profile?.role || "USER"
+            localStorage.setItem("userRole", role)
+            localStorage.setItem("userEmail", email)
+
+            setStatus("Redirecting...")
+
+            if (role === "ADMIN") {
+                router.push("/admin")
             } else {
-                if (data.user) {
-                    setStatus("Check Mock Admin...")
-
-                    // Check Mock Admin
-                    if (email === "anasfahiem18@gmail.com") {
-                        localStorage.setItem("userRole", "ADMIN")
-                        localStorage.setItem("userEmail", email)
-                        setStatus("Redirecting...")
-                        router.push("/admin")
-                        return
-                    }
-
-                    setStatus("Fetching Profile...")
-
-                    // Fetch Role from DB
-                    const { data: profile, error: profileError } = await supabase
-                        .from('profiles')
-                        .select('role')
-                        .eq('id', data.user.id)
-                        .single()
-
-                    if (profileError) {
-                        console.error("Profile Fetch Error:", profileError)
-                    }
-
-                    const role = profile?.role || "USER"
-                    localStorage.setItem("userRole", role)
-                    localStorage.setItem("userEmail", email)
-
-                    setStatus("Redirecting...")
-
-                    if (role === "ADMIN") {
-                        router.push("/admin")
-                    } else {
-                        router.push("/")
-                    }
-                } else {
-                    console.error("No user returned")
-                    setIsLoading(false)
-                }
+                router.push("/")
             }
         } catch (err: any) {
             console.error("Login Exception:", err)

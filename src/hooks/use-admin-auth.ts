@@ -19,18 +19,19 @@ export function useAdminAuth() {
             }
 
             try {
-                // 1. Check Session
-                const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+                // Use getUser() which hits the Supabase server for a fresh auth check.
+                // This is more reliable than getSession() which only reads local storage/cookies.
+                const { data: { user: authUser }, error: userError } = await supabase.auth.getUser()
 
-                if (sessionError || !session) {
+                if (userError || !authUser) {
                     throw new Error("No active session")
                 }
 
-                // 2. Check Admin Role
+                // Check Admin Role from DB
                 const { data: profile, error: profileError } = await supabase
                     .from('profiles')
                     .select('role')
-                    .eq('id', session.user.id)
+                    .eq('id', authUser.id)
                     .single()
 
                 if (profileError || profile?.role !== 'ADMIN') {
@@ -38,13 +39,15 @@ export function useAdminAuth() {
                 }
 
                 if (mounted) {
-                    setUser(session.user)
+                    setUser(authUser)
                     setIsAuthenticated(true)
                 }
 
             } catch (error) {
                 if (mounted) {
                     setIsAuthenticated(false)
+                    localStorage.removeItem("userRole")
+                    localStorage.removeItem("userEmail")
                     router.push('/login')
                 }
             } finally {
@@ -56,12 +59,19 @@ export function useAdminAuth() {
 
         checkAuth()
 
-        // 3. Listen for Auth Changes (e.g. token expire, sign out)
+        // Listen for Auth Changes (e.g. token expire, sign out)
         const { data: { subscription } } = supabase!.auth.onAuthStateChange(async (event, session) => {
             if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESH_REJECTED') {
                 if (mounted) {
                     setIsAuthenticated(false)
+                    localStorage.removeItem("userRole")
+                    localStorage.removeItem("userEmail")
                     router.push('/login')
+                }
+            } else if (event === 'TOKEN_REFRESHED' && session) {
+                // Session was refreshed — re-verify admin status
+                if (mounted) {
+                    checkAuth()
                 }
             }
         })
