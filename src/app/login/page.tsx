@@ -12,6 +12,19 @@ import { supabase } from "@/lib/supabase/client"
 
 export const dynamic = 'force-dynamic'
 
+// Helper: wraps a promise with a timeout
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+    return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => {
+            reject(new Error(`Request timed out after ${ms / 1000}s. Check your internet connection.`))
+        }, ms)
+        promise.then(
+            (val) => { clearTimeout(timer); resolve(val) },
+            (err) => { clearTimeout(timer); reject(err) }
+        )
+    })
+}
+
 export default function LoginPage() {
     const router = useRouter()
     const [email, setEmail] = useState("")
@@ -21,16 +34,15 @@ export default function LoginPage() {
     const [status, setStatus] = useState("")
     const [error, setError] = useState("")
 
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsLoading(true)
         setStatus("Signing in...")
         setError("")
 
+        // Check if the Supabase client is real (not mock)
         if (!supabase) {
-            const msg = "Missing Database Keys. Add NEXT_PUBLIC_SUPABASE_URL & ANON_KEY to Env Vars."
-            setError(msg)
+            setError("Missing database configuration. Contact support.")
             setIsLoading(false)
             return
         }
@@ -40,52 +52,76 @@ export default function LoginPage() {
         localStorage.removeItem("userEmail")
 
         try {
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email,
-                password,
-            })
+            // 1. Sign in with 15-second timeout to prevent infinite hang
+            const { data, error: authError } = await withTimeout(
+                supabase.auth.signInWithPassword({ email, password }),
+                15000
+            )
 
-            if (error) {
-                console.error("Login Error:", error)
-                setError(error.message)
+            if (authError) {
+                console.error("Sign in error:", authError)
+                // Translate common Supabase error messages to user-friendly ones
+                if (authError.message.includes("Invalid login credentials")) {
+                    setError("Wrong email or password. Please try again.")
+                } else if (authError.message.includes("Email not confirmed")) {
+                    setError("Please confirm your email before signing in. Check your inbox.")
+                } else if (authError.message.includes("Too many requests")) {
+                    setError("Too many attempts. Please wait a moment and try again.")
+                } else {
+                    setError(authError.message || "Sign in failed. Please try again.")
+                }
                 setIsLoading(false)
                 return
             }
 
-            if (!data.user) {
-                console.error("No user returned")
-                setError("Sign in failed. Please try again.")
+            if (!data?.user) {
+                setError("Sign in failed. No user data returned — please try again.")
                 setIsLoading(false)
                 return
             }
 
-            setStatus("Fetching Profile...")
+            setStatus("Fetching profile...")
 
-            // Fetch Role from DB (single source of truth)
-            const { data: profile, error: profileError } = await supabase
-                .from('profiles')
-                .select('role')
-                .eq('id', data.user.id)
-                .single()
+            // 2. Fetch role from DB with 10-second timeout
+            let role = "USER"
+            try {
+                const { data: profile, error: profileError } = await withTimeout(
+                    supabase
+                        .from('profiles')
+                        .select('role')
+                        .eq('id', data.user.id)
+                        .single() as any,
+                    10000
+                )
 
-            if (profileError) {
-                console.error("Profile Fetch Error:", profileError)
+                if (profileError) {
+                    console.warn("Profile fetch warning:", profileError.message)
+                    // Don't block login if profile fetch fails — default to USER
+                }
+
+                if (profile?.role) {
+                    role = profile.role
+                }
+            } catch (profileErr: any) {
+                console.warn("Profile fetch failed (defaulting to USER):", profileErr.message)
+                // Non-critical — proceed with default role
             }
 
-            const role = profile?.role || "USER"
             localStorage.setItem("userRole", role)
             localStorage.setItem("userEmail", email)
 
             setStatus("Redirecting...")
 
+            // 3. Navigate based on role
             if (role === "ADMIN") {
-                router.push("/admin")
+                window.location.href = "/admin"
             } else {
-                router.push("/")
+                window.location.href = "/"
             }
+
         } catch (err: any) {
-            console.error("Login Exception:", err)
-            setError("Failed to sign in. Please try again.")
+            console.error("Login exception:", err)
+            setError(err.message || "Something went wrong. Please try again.")
             setIsLoading(false)
         }
     }
@@ -115,14 +151,11 @@ export default function LoginPage() {
                             {error && (
                                 <div className="p-4 mb-4 bg-brand-surface border border-brand-red/50 rounded-sm text-center shadow-2xl shadow-brand-red/10 animate-in fade-in slide-in-from-top-2 relative">
                                     <p className="text-brand-red font-medium text-sm mb-3">{error}</p>
-
-                                    {/* Action Button for specific errors */}
                                     <Link href="/signup">
                                         <Button size="sm" variant="outline" className="w-full border-brand-red/30 hover:bg-brand-red/10 text-brand-red hover:text-brand-white">
                                             Create New Account
                                         </Button>
                                     </Link>
-
                                     <div className="absolute top-0 left-0 w-1 h-full bg-brand-red" />
                                 </div>
                             )}
@@ -136,8 +169,10 @@ export default function LoginPage() {
                                     className="w-full bg-brand-black/50 border border-brand-white/10 rounded-sm px-4 py-3 text-brand-white focus:outline-none focus:border-brand-red transition-colors"
                                     placeholder="agent@recoil.gg"
                                     required
+                                    disabled={isLoading}
                                 />
                             </div>
+
                             <div className="space-y-2">
                                 <label className="text-xs uppercase tracking-widest text-brand-silver font-medium">Password</label>
                                 <div className="relative">
@@ -148,6 +183,7 @@ export default function LoginPage() {
                                         className="w-full bg-brand-black/50 border border-brand-white/10 rounded-sm px-4 py-3 text-brand-white focus:outline-none focus:border-brand-red transition-colors pr-12"
                                         placeholder="••••••••"
                                         required
+                                        disabled={isLoading}
                                     />
                                     <button
                                         type="button"
@@ -164,7 +200,15 @@ export default function LoginPage() {
                             </div>
 
                             <Button className="w-full mt-6" size="lg" disabled={isLoading}>
-                                {isLoading ? (status || "Authenticating...") : "Sign In"}
+                                {isLoading ? (
+                                    <span className="flex items-center gap-2">
+                                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                        </svg>
+                                        {status || "Authenticating..."}
+                                    </span>
+                                ) : "Sign In"}
                             </Button>
                         </form>
 
@@ -179,8 +223,6 @@ export default function LoginPage() {
                     </div>
                 </div>
             </Container>
-
-
         </div>
     )
 }
