@@ -38,7 +38,7 @@ export function HomePageContent({ products }: HomePageContentProps) {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {products.map((product) => (
+                    {products.map((product, index) => (
                         <ProductCard
                             key={product.id}
                             id={product.id}
@@ -46,7 +46,7 @@ export function HomePageContent({ products }: HomePageContentProps) {
                             price={product.price}
                             category={product.category}
                             image={product.image}
-                            isNew={Math.random() < 0.3} // Random 'New' tag for visual testing
+                            isNew={index < 2} // First two items get the new tag instead of random
                         />
                     ))}
                 </div>

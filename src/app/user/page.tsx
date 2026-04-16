@@ -365,8 +365,8 @@ function UserDashboardContent() {
                 <div className="text-center py-12 border border-dashed border-brand-white/10 rounded-sm">
                     <Package className="w-12 h-12 text-brand-silver/20 mx-auto mb-4" />
                     <p className="text-brand-silver">No orders recorded in archives.</p>
-                    <Link href="/shop">
-                        <Button variant="recoil-glitch" className="mt-4">{t.nav.shop}</Button>
+                    <Link href="/shop" className="mt-4 inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors bg-brand-red text-brand-white hover:bg-brand-red/90 h-9 px-4 py-2 border border-transparent tracking-wider font-heading uppercase clip-path-polygon-[0_0,_100%_0,_100%_calc(100%_-_10px),_calc(100%_-_10px)_100%,_0_100%] group relative overflow-hidden">
+                        <span className="relative z-10 flex items-center justify-center w-full">{t.nav.shop}</span>
                     </Link>
                 </div>
             ) : (

@@ -210,15 +210,11 @@ export function MobileNavbar() {
                                             <div className="bg-brand-surface-subtle p-4 rounded-lg border border-brand-white/10">
                                                 <p className="text-sm text-brand-silver mb-4 leading-relaxed">Join the elite gaming community. Access exclusive drops and pro-tier gear.</p>
                                                 <div className="grid grid-cols-2 gap-3">
-                                                    <Link href="/login" onClick={() => setIsOpen(false)} className="w-full">
-                                                        <Button variant="outline" className="w-full text-sm">
-                                                            {t.nav.signIn}
-                                                        </Button>
+                                                    <Link href="/login" onClick={() => setIsOpen(false)} className="w-full inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors border border-brand-white/10 text-brand-white hover:bg-brand-white/5 h-9 px-4 py-2">
+                                                        {t.nav.signIn}
                                                     </Link>
-                                                    <Link href="/signup" onClick={() => setIsOpen(false)} className="w-full">
-                                                        <Button variant="recoil-glitch" className="w-full text-sm">
-                                                            {t.nav.join}
-                                                        </Button>
+                                                    <Link href="/signup" onClick={() => setIsOpen(false)} className="w-full inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors border border-transparent bg-brand-red text-brand-white hover:bg-brand-red/90 h-9 px-4 py-2 clip-path-polygon-[0_0,_100%_0,_100%_calc(100%_-_10px),_calc(100%_-_10px)_100%,_0_100%]">
+                                                        {t.nav.join}
                                                     </Link>
                                                 </div>
                                             </div>
