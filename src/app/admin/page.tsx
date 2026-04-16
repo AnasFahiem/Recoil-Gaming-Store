@@ -400,7 +400,7 @@ export default function AdminDashboard() {
                 </nav>
 
                 <div className="absolute bottom-6 left-6 right-6 space-y-2">
-                    <Link href="/"><Button variant="outline" className="w-full">{t.admin.backToSite}</Button></Link>
+                    <Link href="/" className="flex w-full h-12 px-6 py-2 items-center justify-center whitespace-nowrap text-sm font-medium transition-colors border border-brand-red text-brand-red bg-transparent hover:bg-brand-red/10 font-heading uppercase clip-path-polygon-[0_0,_100%_0,_100%_calc(100%_-_10px),_calc(100%_-_10px)_100%,_0_100%]">{t.admin.backToSite}</Link>
                     <SignOutButton className="w-full justify-start text-brand-silver hover:text-brand-red hover:bg-brand-white/5" variant="ghost">
                         <LogOut className="w-4 h-4 mr-2" /> {t.nav.signOut}
                     </SignOutButton>

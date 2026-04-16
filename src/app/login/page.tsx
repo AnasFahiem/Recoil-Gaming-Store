@@ -151,10 +151,8 @@ export default function LoginPage() {
                             {error && (
                                 <div className="p-4 mb-4 bg-brand-surface border border-brand-red/50 rounded-sm text-center shadow-2xl shadow-brand-red/10 animate-in fade-in slide-in-from-top-2 relative">
                                     <p className="text-brand-red font-medium text-sm mb-3">{error}</p>
-                                    <Link href="/signup">
-                                        <Button size="sm" variant="outline" className="w-full border-brand-red/30 hover:bg-brand-red/10 text-brand-red hover:text-brand-white">
-                                            Create New Account
-                                        </Button>
+                                    <Link href="/signup" className="flex w-full h-9 px-4 items-center justify-center whitespace-nowrap text-sm font-medium transition-colors hover:bg-brand-red/10 font-heading uppercase clip-path-polygon-[0_0,_100%_0,_100%_calc(100%_-_10px),_calc(100%_-_10px)_100%,_0_100%] border border-brand-red/30 text-brand-red hover:text-brand-white">
+                                        Create New Account
                                     </Link>
                                     <div className="absolute top-0 left-0 w-1 h-full bg-brand-red" />
                                 </div>

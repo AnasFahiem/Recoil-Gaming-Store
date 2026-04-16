@@ -121,8 +121,8 @@ export default function SignupPage() {
                                     We sent a confirmation link to <strong>{email}</strong>.
                                     <br />Click it to verify your account.
                                 </p>
-                                <Link href="/login">
-                                    <Button variant="outline" className="w-full">Back to Login</Button>
+                                <Link href="/login" className="flex w-full h-12 px-6 py-2 items-center justify-center whitespace-nowrap text-sm font-medium transition-colors hover:bg-brand-red/10 font-heading uppercase clip-path-polygon-[0_0,_100%_0,_100%_calc(100%_-_10px),_calc(100%_-_10px)_100%,_0_100%] border border-brand-red text-brand-red">
+                                    Back to Login
                                 </Link>
                             </div>
                         ) : (

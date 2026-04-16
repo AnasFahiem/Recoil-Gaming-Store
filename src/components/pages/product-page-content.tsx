@@ -34,7 +34,7 @@ export function ProductPageContent({ product }: ProductPageContentProps) {
     if (!product) return (
         <div className="min-h-screen bg-brand-black flex flex-col items-center justify-center text-brand-silver gap-4">
             <Typography variant="h3">{t.common.noResults}</Typography>
-            <Link href="/shop"><Button variant="outline">{t.product.backToShop}</Button></Link>
+            <Link href="/shop" className="inline-flex h-9 px-4 items-center justify-center whitespace-nowrap text-sm font-medium transition-colors border border-brand-red text-brand-red bg-transparent hover:bg-brand-red/10 font-heading uppercase clip-path-polygon-[0_0,_100%_0,_100%_calc(100%_-_10px),_calc(100%_-_10px)_100%,_0_100%]">{t.product.backToShop}</Link>
         </div>
     )
 

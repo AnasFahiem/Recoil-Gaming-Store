@@ -200,10 +200,8 @@ export function Navbar() {
                         )}
                     </Button>
                     {!userRole ? (
-                        <Link href="/signup" className="hidden lg:block">
-                            <Button variant="recoil-glitch" size="sm">
-                                {t.nav.join}
-                            </Button>
+                        <Link href="/signup" className="hidden lg:inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors bg-brand-white text-brand-black hover:bg-brand-silver skew-x-[-10deg] h-9 px-4 uppercase tracking-wider font-heading clip-path-polygon-[0_0,_100%_0,_100%_calc(100%_-_10px),_calc(100%_-_10px)_100%,_0_100%]">
+                            {t.nav.join}
                         </Link>
                     ) : (
                         <Button variant="default" size="sm" className="hidden lg:block bg-brand-red text-white" onClick={handleScrollToSubscribe}>
@@ -235,11 +233,11 @@ export function Navbar() {
                         <div className="flex flex-col gap-3 mt-4">
                             {!userRole ? (
                                 <>
-                                    <Link href="/login" onClick={() => setIsOpen(false)}>
-                                        <Button variant="outline" className="w-full">{t.nav.signIn}</Button>
+                                    <Link href="/login" onClick={() => setIsOpen(false)} className="flex w-full items-center justify-center whitespace-nowrap text-sm font-medium transition-colors border border-brand-red text-brand-red bg-transparent hover:bg-brand-red/10 h-12 px-6 py-2 uppercase tracking-wider font-heading clip-path-polygon-[0_0,_100%_0,_100%_calc(100%_-_10px),_calc(100%_-_10px)_100%,_0_100%]">
+                                        {t.nav.signIn}
                                     </Link>
-                                    <Link href="/signup" onClick={() => setIsOpen(false)}>
-                                        <Button className="w-full">{t.nav.join}</Button>
+                                    <Link href="/signup" onClick={() => setIsOpen(false)} className="flex w-full items-center justify-center whitespace-nowrap text-sm font-medium transition-colors bg-brand-red text-brand-white hover:bg-brand-red/90 h-12 px-6 py-2 uppercase tracking-wider font-heading clip-path-polygon-[0_0,_100%_0,_100%_calc(100%_-_10px),_calc(100%_-_10px)_100%,_0_100%] border border-transparent">
+                                        {t.nav.join}
                                     </Link>
                                 </>
                             ) : (

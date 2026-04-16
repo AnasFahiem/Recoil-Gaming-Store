@@ -104,26 +104,22 @@ export function HeroSection() {
 
                     {/* CTAs */}
                     <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-                        <Link href="/shop" className="relative z-30">
-                            <Button size="lg" className="h-14 px-8 text-base group relative overflow-hidden">
-                                <span className="relative z-10 flex items-center gap-2">
-                                    {t.hero.ctaShop} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                </span>
-                                <motion.div
-                                    className="absolute inset-0 bg-brand-white mix-blend-overlay"
-                                    initial={{ x: '-100%' }}
-                                    whileHover={{ x: '100%' }}
-                                    transition={{ duration: 0.5 }}
-                                />
-                            </Button>
+                        <Link href="/shop" className="relative z-30 inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors border border-transparent bg-brand-red text-brand-white tracking-wider font-heading uppercase clip-path-polygon-[0_0,_100%_0,_100%_calc(100%_-_10px),_calc(100%_-_10px)_100%,_0_100%] h-14 px-8 text-base group overflow-hidden">
+                            <span className="relative z-10 flex items-center gap-2">
+                                {t.hero.ctaShop} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            </span>
+                            <motion.div
+                                className="absolute inset-0 bg-brand-white mix-blend-overlay"
+                                initial={{ x: '-100%' }}
+                                whileHover={{ x: '100%' }}
+                                transition={{ duration: 0.5 }}
+                            />
                         </Link>
 
-                        <Link href="/technology" className="relative z-30">
-                            <Button size="lg" variant="outline" className="h-14 px-8 text-base group">
-                                <span className="flex items-center gap-2">
-                                    {t.hero.ctaTech} <ChevronRight className="w-4 h-4 text-brand-silver group-hover:text-brand-white transition-colors" />
-                                </span>
-                            </Button>
+                        <Link href="/technology" className="relative z-30 inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors border border-brand-red text-brand-red bg-transparent hover:bg-brand-red/10 tracking-wider font-heading uppercase clip-path-polygon-[0_0,_100%_0,_100%_calc(100%_-_10px),_calc(100%_-_10px)_100%,_0_100%] h-14 px-8 text-base group">
+                            <span className="flex items-center gap-2">
+                                {t.hero.ctaTech} <ChevronRight className="w-4 h-4 text-brand-silver group-hover:text-brand-white transition-colors" />
+                            </span>
                         </Link>
                     </div>
 

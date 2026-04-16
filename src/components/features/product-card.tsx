@@ -64,9 +64,9 @@ export function ProductCard({ id, title, price, category, image, innerImages, is
 
                 {/* Quick Add Overlay */}
                 <div className="absolute inset-0 bg-brand-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4">
-                    <Button className="w-full translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                    <div className="w-full translate-y-4 group-hover:translate-y-0 transition-transform duration-300 inline-flex items-center justify-center whitespace-nowrap text-sm font-medium h-12 px-6 py-2 bg-brand-red text-brand-white hover:bg-brand-red/90 border border-transparent tracking-wider font-heading uppercase clip-path-polygon-[0_0,_100%_0,_100%_calc(100%_-_10px),_calc(100%_-_10px)_100%,_0_100%]">
                         {t.common.viewAll.replace(' results', '')}
-                    </Button>
+                    </div>
                 </div>
             </Link>
 
