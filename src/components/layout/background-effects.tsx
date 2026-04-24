@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react"
 import { motion } from "framer-motion"
+import Image from "next/image"
 
 export function BackgroundEffects() {
     const containerRef = useRef<HTMLDivElement>(null)
@@ -38,7 +39,9 @@ export function BackgroundEffects() {
                 <div className="absolute top-[15%] left-[10%] text-brand-red/20 font-heading text-4xl font-bold tracking-widest rotate-[-12deg]">PRECISION</div>
                 <div className="absolute top-[25%] right-[15%] text-brand-red/20 font-heading text-2xl font-bold tracking-widest rotate-[6deg]">VELOCITY</div>
                 {/* RECOIL Replaced by Logo */}
-                <img src="/assets/logo-v5.png" alt="RECOIL" className="absolute bottom-[20%] left-[20%] h-24 w-auto opacity-10 rotate-0" />
+                <div className="absolute bottom-[20%] left-[20%] h-24 w-64 opacity-10 rotate-0">
+                    <Image src="/assets/logo-v5.png" alt="RECOIL" fill className="object-contain" />
+                </div>
 
                 <div className="absolute top-[40%] left-[40%] text-brand-red/20 font-heading text-sm font-bold tracking-[0.5em]">CONTROL</div>
                 <div className="absolute bottom-[35%] right-[25%] text-brand-red/20 font-heading text-3xl font-bold tracking-widest rotate-[-5deg]">ACCURACY</div>
