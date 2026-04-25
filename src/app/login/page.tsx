@@ -6,125 +6,38 @@ import { Typography } from "@/components/ui/typography"
 import { Logo } from "@/components/ui/logo"
 import Link from "next/link"
 import { ArrowLeft, Eye, EyeOff } from "lucide-react"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase/client"
+import { useState, useEffect } from "react"
+import { useFormState, useFormStatus } from "react-dom"
+import { loginAction } from "./actions"
 
 export const dynamic = 'force-dynamic'
 
-// Helper: wraps a promise with a timeout
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-    return new Promise((resolve, reject) => {
-        const timer = setTimeout(() => {
-            reject(new Error(`Request timed out after ${ms / 1000}s. Check your internet connection.`))
-        }, ms)
-        promise.then(
-            (val) => { clearTimeout(timer); resolve(val) },
-            (err) => { clearTimeout(timer); reject(err) }
-        )
-    })
+function SubmitButton() {
+    const { pending } = useFormStatus()
+    return (
+        <Button className="w-full mt-6" size="lg" disabled={pending} type="submit">
+            {pending ? (
+                <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Authenticating...
+                </span>
+            ) : "Sign In"}
+        </Button>
+    )
 }
 
 export default function LoginPage() {
-    const router = useRouter()
-    const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
     const [showPassword, setShowPassword] = useState(false)
-    const [isLoading, setIsLoading] = useState(false)
-    const [status, setStatus] = useState("")
-    const [error, setError] = useState("")
+    const [state, formAction] = useFormState(loginAction, { error: '' })
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setIsLoading(true)
-        setStatus("Signing in...")
-        setError("")
-
-        // Check if the Supabase client is real (not mock)
-        if (!supabase) {
-            setError("Missing database configuration. Contact support.")
-            setIsLoading(false)
-            return
-        }
-
-        // Clear any stale local state first
+    // Clear stale local state on mount
+    useEffect(() => {
         localStorage.removeItem("userRole")
         localStorage.removeItem("userEmail")
-
-        try {
-            // 1. Sign in with 15-second timeout to prevent infinite hang
-            const { data, error: authError } = await withTimeout(
-                supabase.auth.signInWithPassword({ email, password }),
-                15000
-            )
-
-            if (authError) {
-                console.error("Sign in error:", authError)
-                // Translate common Supabase error messages to user-friendly ones
-                if (authError.message.includes("Invalid login credentials")) {
-                    setError("Wrong email or password. Please try again.")
-                } else if (authError.message.includes("Email not confirmed")) {
-                    setError("Please confirm your email before signing in. Check your inbox.")
-                } else if (authError.message.includes("Too many requests")) {
-                    setError("Too many attempts. Please wait a moment and try again.")
-                } else {
-                    setError(authError.message || "Sign in failed. Please try again.")
-                }
-                setIsLoading(false)
-                return
-            }
-
-            if (!data?.user) {
-                setError("Sign in failed. No user data returned — please try again.")
-                setIsLoading(false)
-                return
-            }
-
-            setStatus("Fetching profile...")
-
-            // 2. Fetch role from DB with 10-second timeout
-            let role = "USER"
-            try {
-                const { data: profile, error: profileError } = await withTimeout(
-                    supabase
-                        .from('profiles')
-                        .select('role')
-                        .eq('id', data.user.id)
-                        .single() as any,
-                    10000
-                )
-
-                if (profileError) {
-                    console.warn("Profile fetch warning:", profileError.message)
-                    // Don't block login if profile fetch fails — default to USER
-                }
-
-                if (profile?.role) {
-                    role = profile.role
-                }
-            } catch (profileErr: any) {
-                console.warn("Profile fetch failed (defaulting to USER):", profileErr.message)
-                // Non-critical — proceed with default role
-            }
-
-            localStorage.setItem("userRole", role)
-            localStorage.setItem("userEmail", email)
-
-            setStatus("Redirecting...")
-
-            // 3. Navigate based on role
-            if (role === "ADMIN") {
-                window.location.href = "/admin"
-            } else {
-                window.location.href = "/"
-            }
-
-        } catch (err: any) {
-            console.error("Login exception:", err)
-            setError(err.message || "Something went wrong. Please try again.")
-            setIsLoading(false)
-        }
-    }
+    }, [])
 
     return (
         <div className="min-h-screen flex flex-col relative overflow-hidden">
@@ -147,10 +60,10 @@ export default function LoginPage() {
                             <p className="text-brand-silver text-sm">Sign in to access your orders and profile.</p>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            {error && (
+                        <form action={formAction} className="space-y-4">
+                            {state?.error && (
                                 <div className="p-4 mb-4 bg-brand-surface border border-brand-red/50 rounded-sm text-center shadow-2xl shadow-brand-red/10 animate-in fade-in slide-in-from-top-2 relative">
-                                    <p className="text-brand-red font-medium text-sm mb-3">{error}</p>
+                                    <p className="text-brand-red font-medium text-sm mb-3">{state.error}</p>
                                     <Link href="/signup" className="flex w-full h-9 px-4 items-center justify-center whitespace-nowrap text-sm font-medium transition-colors hover:bg-brand-red/10 font-heading uppercase clip-path-polygon-[0_0,_100%_0,_100%_calc(100%_-_10px),_calc(100%_-_10px)_100%,_0_100%] border border-brand-red/30 text-brand-red hover:text-brand-white">
                                         Create New Account
                                     </Link>
@@ -161,13 +74,11 @@ export default function LoginPage() {
                             <div className="space-y-2">
                                 <label className="text-xs uppercase tracking-widest text-brand-silver font-medium">Email</label>
                                 <input
+                                    name="email"
                                     type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
                                     className="w-full bg-brand-black/50 border border-brand-white/10 rounded-sm px-4 py-3 text-brand-white focus:outline-none focus:border-brand-red transition-colors"
                                     placeholder="agent@recoil.gg"
                                     required
-                                    disabled={isLoading}
                                 />
                             </div>
 
@@ -175,13 +86,11 @@ export default function LoginPage() {
                                 <label className="text-xs uppercase tracking-widest text-brand-silver font-medium">Password</label>
                                 <div className="relative">
                                     <input
+                                        name="password"
                                         type={showPassword ? "text" : "password"}
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
                                         className="w-full bg-brand-black/50 border border-brand-white/10 rounded-sm px-4 py-3 text-brand-white focus:outline-none focus:border-brand-red transition-colors pr-12"
                                         placeholder="••••••••"
                                         required
-                                        disabled={isLoading}
                                     />
                                     <button
                                         type="button"
@@ -197,17 +106,7 @@ export default function LoginPage() {
                                 </div>
                             </div>
 
-                            <Button className="w-full mt-6" size="lg" disabled={isLoading}>
-                                {isLoading ? (
-                                    <span className="flex items-center gap-2">
-                                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                                        </svg>
-                                        {status || "Authenticating..."}
-                                    </span>
-                                ) : "Sign In"}
-                            </Button>
+                            <SubmitButton />
                         </form>
 
                         <div className="mt-6 text-center">
